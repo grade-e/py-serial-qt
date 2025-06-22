@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "py-serial-qt"
+version = "1.0.0"
+description = "Serial hex packet GUI with PyQt5"
+authors = ["Jinwoo Sung <jwsung91@gmail.com>"]
+packages = [{ include = "serial_gui", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+PyQt5 = "^5.15"
+pyserial = "^3.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-qt = "^4.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.black]
+line-length = 88
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+serial-gui = "main:main"

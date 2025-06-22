@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor
 from PyQt5.QtCore import QTimer
-from core.serial_handler import SerialHandler
+from serial_gui.core.serial_handler import SerialHandler
 
 import re
 

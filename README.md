@@ -18,8 +18,15 @@ This application provides a clean interface for sending and receiving space-sepa
 ```bash
 ├── LICENSE
 ├── README.md
+├── docs
+│   └── img
+│       ├── gui_clean.png
+│       └── gui_example.png
 ├── main.py
 ├── pyproject.toml
+├── pytest.ini
+├── requirements-dev.txt
+├── requirements.txt
 ├── src
 │   └── serial_gui
 │       ├── core
@@ -27,6 +34,7 @@ This application provides a clean interface for sending and receiving space-sepa
 │       │   └── serial_handler.py
 │       └── gui
 │           ├── __init__.py
+│           ├── port_combo_box.py
 │           └── serial_gui.py
 └── tests
     ├── test_serial_gui.py
@@ -71,6 +79,32 @@ Or if you define a script alias in `pyproject.toml`:
 
 ```bash
 poetry run serial-gui
+```
+
+### Default
+
+1-1. install dependancy (For Runtime Only)
+
+```bash
+pip install -r requirements.txt
+```
+
+1-2. install dependancy (For Development (runtime + testing))
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+2. run tests: (optional)
+
+```bash
+pytest
+```
+
+3. Run the GUI:
+
+```bash
+python main.py
 ```
 
 ---

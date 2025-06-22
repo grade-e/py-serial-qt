@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor
 from PyQt5.QtCore import QTimer
 from serial_gui.core.serial_handler import SerialHandler
+from serial_gui.gui.port_combo_box import PortComboBox
 
 import re
 
@@ -26,7 +27,7 @@ class SerialCommGUI(QWidget):
         layout = QVBoxLayout()
 
         port_layout = QHBoxLayout()
-        self.port_combo = QComboBox()
+        self.port_combo = PortComboBox()
         self.port_combo.addItems(self.serial.list_ports())
         self.baud_input = QLineEdit("115200")
         self.open_btn = QPushButton("Open")

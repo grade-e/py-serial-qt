@@ -85,30 +85,29 @@ class SerialCommGUI(QWidget):
             except Exception as e:
                 self.log_append(f"Error: {e}", "red")
 
-
-def send_data(self):
-    if not self.serial.is_open:
-        return
-    try:
-        raw_input = self.input_line.text().strip()
-
-        cleaned = re.sub(r"[^0-9a-fA-FxX]", " ", raw_input)
-        cleaned = cleaned.replace("0x", "").replace("0X", "")
-        parts = cleaned.strip().split()
-        valid_hex = []
-        for part in parts:
-            if re.fullmatch(r"[0-9a-fA-F]{1,2}", part):
-                valid_hex.append(part.zfill(2).upper())
-
-        if not valid_hex:
-            self.log_append("[TX] No valid hex to send.", "orange")
+    def send_data(self):
+        if not self.serial.is_open:
             return
+        try:
+            raw_input = self.input_line.text().strip()
 
-        bytes_data = bytes(int(b, 16) for b in valid_hex)
-        self.serial.write(bytes_data)
-        self.log_append(f"[TX] {' '.join(valid_hex)}", "blue")
-    except Exception as e:
-        self.log_append(f"Send error: {e}", "red")
+            cleaned = re.sub(r"[^0-9a-fA-FxX]", " ", raw_input)
+            cleaned = cleaned.replace("0x", "").replace("0X", "")
+            parts = cleaned.strip().split()
+            valid_hex = []
+            for part in parts:
+                if re.fullmatch(r"[0-9a-fA-F]{1,2}", part):
+                    valid_hex.append(part.zfill(2).upper())
+
+            if not valid_hex:
+                self.log_append("[TX] No valid hex to send.", "orange")
+                return
+
+            bytes_data = bytes(int(b, 16) for b in valid_hex)
+            self.serial.write(bytes_data)
+            self.log_append(f"[TX] {' '.join(valid_hex)}", "blue")
+        except Exception as e:
+            self.log_append(f"Send error: {e}", "red")
 
     def read_data(self):
         if self.serial.in_waiting:

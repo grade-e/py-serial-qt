@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication
-from serial_gui import SerialCommGUI
+from gui.serial_gui import SerialCommGUI
 import sys
 
 if __name__ == "__main__":

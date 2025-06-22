@@ -1,17 +1,8 @@
-import serial
-import serial.tools.list_ports
-from PyQt5.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QTextEdit,
-    QPushButton,
-    QLineEdit,
-    QHBoxLayout,
-    QLabel,
-    QComboBox,
-)
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QTextCharFormat, QTextCursor, QColor
 from PyQt5.QtCore import QTimer
+from core.serial_handler import SerialHandler
+
 import re
 
 
@@ -25,7 +16,7 @@ class SerialCommGUI(QWidget):
         self.setWindowTitle("Serial Packet Monitor")
         self.setMinimumSize(600, 400)
 
-        self.serial = serial.Serial()
+        self.serial = SerialHandler()
         self.timer = QTimer()
         self.timer.timeout.connect(self.read_data)
 
@@ -34,11 +25,9 @@ class SerialCommGUI(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Serial Port Selection
         port_layout = QHBoxLayout()
         self.port_combo = QComboBox()
-        ports = serial.tools.list_ports.comports()
-        self.port_combo.addItems([p.device for p in ports])
+        self.port_combo.addItems(self.serial.list_ports())
         self.baud_input = QLineEdit("115200")
         self.open_btn = QPushButton("Open")
         self.open_btn.clicked.connect(self.toggle_serial)
@@ -49,11 +38,9 @@ class SerialCommGUI(QWidget):
         port_layout.addWidget(self.baud_input)
         port_layout.addWidget(self.open_btn)
 
-        # Log Area
         self.log = QTextEdit()
         self.log.setReadOnly(True)
 
-        # Input Area
         input_layout = QHBoxLayout()
         self.input_line = QLineEdit()
         self.send_btn = QPushButton("Send")
@@ -65,20 +52,19 @@ class SerialCommGUI(QWidget):
         layout.addLayout(port_layout)
         layout.addWidget(self.log)
         layout.addLayout(input_layout)
-
         self.setLayout(layout)
 
     def toggle_serial(self):
-        if self.serial.is_open:
+        if self.serial.is_open():
             self.serial.close()
             self.timer.stop()
             self.open_btn.setText("Open")
             self.log_append("Disconnected.", "gray")
         else:
             try:
-                self.serial.port = self.port_combo.currentText()
-                self.serial.baudrate = int(self.baud_input.text())
-                self.serial.open()
+                port = self.port_combo.currentText()
+                baud = int(self.baud_input.text())
+                self.serial.open(port, baud)
                 self.timer.start(100)
                 self.open_btn.setText("Close")
                 self.log_append("Connected.", "gray")
@@ -86,36 +72,32 @@ class SerialCommGUI(QWidget):
                 self.log_append(f"Error: {e}", "red")
 
     def send_data(self):
-        if not self.serial.is_open:
-            return
         try:
             raw_input = self.input_line.text().strip()
-
             cleaned = re.sub(r"[^0-9a-fA-FxX]", " ", raw_input)
             cleaned = cleaned.replace("0x", "").replace("0X", "")
             parts = cleaned.strip().split()
-            valid_hex = []
-            for part in parts:
-                if re.fullmatch(r"[0-9a-fA-F]{1,2}", part):
-                    valid_hex.append(part.zfill(2).upper())
-
+            valid_hex = [
+                p.zfill(2).upper()
+                for p in parts
+                if re.fullmatch(r"[0-9a-fA-F]{1,2}", p)
+            ]
             if not valid_hex:
                 self.log_append("[TX] No valid hex to send.", "orange")
                 return
-
             bytes_data = bytes(int(b, 16) for b in valid_hex)
-            self.serial.write(bytes_data)
+            self.serial.send_bytes(bytes_data)
             self.log_append(f"[TX] {' '.join(valid_hex)}", "blue")
         except Exception as e:
             self.log_append(f"Send error: {e}", "red")
 
     def read_data(self):
-        if self.serial.in_waiting:
-            try:
-                data = self.serial.read_all()
+        try:
+            data = self.serial.read_bytes()
+            if data:
                 self.log_append(f"[RX] {format_hex_string(data)}", "green")
-            except Exception as e:
-                self.log_append(f"Read error: {e}", "red")
+        except Exception as e:
+            self.log_append(f"Read error: {e}", "red")
 
     def log_append(self, message, color):
         cursor = self.log.textCursor()
